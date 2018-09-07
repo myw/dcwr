@@ -1,2 +1,70 @@
 # dcwr
+
 Run a command inside Docker Compose as if it were local
+
+
+## Documentation
+
+Command-line usage:
+
+```
+dwcr [-h|--help] [-f|--file compose-file] [-q|--quiet] [-n|--no-run] [-k|--keep] [*]
+
+  Transparently run a command inside a Docker Compose service
+
+  dwcr runs the command inside a new Docker container for the Docker Compose
+  service specified, as if it were running locally. It does this by taking
+  every command argument that points to a file or directory, mounting it
+  inside the Docker container and replacing it with the mount point
+  destination.
+
+  By default, print the final docker-compose command before running it.
+
+Arguments:
+  -h --help   - show this usage info
+  -f --file   - path to docker-compose.yml file to use
+                [defaults to ./docker-compose.yml]
+  -q --quiet  - do not print the final command before running
+  -n --no-run - do not run the command, just print it
+  -k --keep   - do not add --rm to docker-compose run (default behavior)
+  [*]         - arguments to docker-compose run
+                [options, service name, command, etc]
+
+Example:
+  $ dcwr -n service-foo cmd-bar arg-baz README.md . -narf LICENSE /usr/share/man/man1/ls.1
+
+  docker-compose run \
+    --rm \
+    --volume=README.md:/tmp/9ZnUSxR1/4-README.md \
+    --volume=.:/tmp/9ZnUSxR1/5-. \
+    --volume=LICENSE:/tmp/9ZnUSxR1/7-LICENSE \
+    --volume=/usr/share/man/man1/ls.1:/tmp/9ZnUSxR1/8-ls.1 \
+    service-foo \
+      cmd-bar \
+        arg-bazbaz \
+        /tmp/9ZnUSxR1/4-README.md \
+        /tmp/9ZnUSxR1/5-. \
+        -narf \
+        /tmp/9ZnUSxR1/7-LICENSE \
+        /tmp/9ZnUSxR1/8-ls.1
+```
+
+## Dependencies
+
+- Docker
+- Docker Compose
+- `bash` >= 2.0
+
+
+## Caveats
+
+This is a convenience utility and its approach fundamentally *cannot* account for all edge cases so
+it has some important caveats:
+
+- New files/directories (i.e. that do not already exist on the host system) cannot be mounted this
+  way: you will have to `touch` or `mkdir` them first on your own
+- Commands that reference other files that are not specified in the container or otherwise
+  mounted will not work without additional options
+- Docker images that do not tolerate mounts into a temp directory will not work
+- The executing command is always at the mercy of the image, so there are lots of other
+  potential ways to "break" the default behavior

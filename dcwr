@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+
+usage() {
+  cat <<EOU
+$0 [-h|--help] [-f|--file compose-file] [-q|--quiet] [-n|--no-run] [-k|--keep] [*]
+
+  Transparently run a command inside a Docker Compose service
+
+  $0 runs the command inside a new Docker container for the Docker Compose
+  service specified, as if it were running locally. It does this by taking
+  every command argument that points to a file or directory, mounting it
+  inside the Docker container and replacing it with the mount point
+  destination.
+
+  By default, print the final docker-compose command before running it.
+
+Arguments:
+  -h --help   - show this usage info
+  -f --file   - path to docker-compose.yml file to use
+                [defaults to ./docker-compose.yml]
+  -q --quiet  - do not print the final command before running
+  -n --no-run - do not run the command, just print it
+  -k --keep   - do not add --rm to docker-compose run (default behavior)
+  [*]         - arguments to docker-compose run
+                [options, service name, command, etc]
+
+Example:
+  $ dcwr -n service-foo cmd-bar arg-baz README.md . -narf LICENSE /usr/share/man/man1/ls.1
+
+  docker-compose run \
+    --rm \
+    --volume=README.md:/tmp/9ZnUSxR1/4-README.md \
+    --volume=.:/tmp/9ZnUSxR1/5-. \
+    --volume=LICENSE:/tmp/9ZnUSxR1/7-LICENSE \
+    --volume=/usr/share/man/man1/ls.1:/tmp/9ZnUSxR1/8-ls.1 \
+    service-foo \
+      cmd-bar \
+        arg-bazbaz \
+        /tmp/9ZnUSxR1/4-README.md \
+        /tmp/9ZnUSxR1/5-. \
+        -narf \
+        /tmp/9ZnUSxR1/7-LICENSE \
+        /tmp/9ZnUSxR1/8-ls.1
+EOU
+  exit 1
+}
+
+# Parse through the initial arguments
+quiet=false
+no_run=false
+rm_arg='--rm'
+compose_file=''
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h|--help)
+      usage
+    ;;
+    -q|--quiet)
+      quiet=true
+      shift
+    ;;
+    -n|--no-run)
+      no_run=true
+      shift
+    ;;
+    -k|--keep)
+      rm_arg=''
+      shift
+    ;;
+    -f|--file)
+      compose_file="--file $2"
+      shift 2
+    ;;
+    *)
+      # Finding any other argument ends the parsing
+      break
+    ;;
+  esac
+done
+
+# Declare all arrays used
+declare -a mount_destinations
+declare -a mounts
+declare -a unchanged_cmd_args
+declare -a docker_cmd
+
+# Make a temp directory name to hold mount destinations
+# Fine to do this in unsafe mode as it will be made inside the container
+container_mount_root="$(mktemp -d -u)"
+
+# Iterate through the agruments and collect all the ones that are files/mount points
+for ((ax=1;ax<=$#;ax++)); do
+  arg="${!ax}"
+  if [ -r "$arg" ] && [ -d "$arg" -o -f "$arg" ]; then
+    mount_destinations[$ax]="$container_mount_root/$ax-$(basename $arg)"
+    mounts[$ax]="--volume=$arg:${mount_destinations[$ax]}"
+  else
+    unchanged_cmd_args[$ax]="$arg"
+  fi
+done
+
+# Construct the modified command run inside the container
+for ((ax=1;ax<=$#;ax++)); do
+  if [ -n "${mount_destinations[$ax]}" ]; then
+    docker_cmd[$ax]="${mount_destinations[$ax]}"
+  else
+    docker_cmd[$ax]="${unchanged_cmd_args[$ax]}"
+  fi
+done
+
+# Combine into the final command
+combined_command="docker-compose $compose_file run $rm_arg ${mounts[*]} ${docker_cmd[*]}"
+
+if ! $quiet; then
+  echo "$combined_command" > /dev/stderr
+fi
+
+if ! $no_run; then
+  exec $combined_command
+fi
