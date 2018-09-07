@@ -29,9 +29,9 @@ Example:
 
   docker-compose run \
     --rm \
-    --volume=README.md:/tmp/9ZnUSxR1/4-README.md \
-    --volume=.:/tmp/9ZnUSxR1/5-. \
-    --volume=LICENSE:/tmp/9ZnUSxR1/7-LICENSE \
+    --volume=/mydir/README.md:/tmp/9ZnUSxR1/4-README.md \
+    --volume=/mydir/.:/tmp/9ZnUSxR1/5-. \
+    --volume=/mydir/LICENSE:/tmp/9ZnUSxR1/7-LICENSE \
     --volume=/usr/share/man/man1/ls.1:/tmp/9ZnUSxR1/8-ls.1 \
     service-foo \
       cmd-bar \
@@ -92,8 +92,17 @@ container_mount_root="$(mktemp -d -u)"
 for ((ax=1;ax<=$#;ax++)); do
   arg="${!ax}"
   if [ -r "$arg" ] && [ -d "$arg" -o -f "$arg" ]; then
+    # Mount sources must be absolute paths
+    case $arg in
+      /*)
+        mount_source=$arg
+      ;;
+      *)
+        mount_source=$PWD/$arg;;
+    esac
+
     mount_destinations[$ax]="$container_mount_root/$ax-$(basename $arg)"
-    mounts[$ax]="--volume=$arg:${mount_destinations[$ax]}"
+    mounts[$ax]="--volume=$mount_source:${mount_destinations[$ax]}"
   else
     unchanged_cmd_args[$ax]="$arg"
   fi

@@ -35,9 +35,9 @@ Example:
 
   docker-compose run \
     --rm \
-    --volume=README.md:/tmp/9ZnUSxR1/4-README.md \
-    --volume=.:/tmp/9ZnUSxR1/5-. \
-    --volume=LICENSE:/tmp/9ZnUSxR1/7-LICENSE \
+    --volume=/mydir/README.md:/tmp/9ZnUSxR1/4-README.md \
+    --volume=/mydir/.:/tmp/9ZnUSxR1/5-. \
+    --volume=/mydir/LICENSE:/tmp/9ZnUSxR1/7-LICENSE \
     --volume=/usr/share/man/man1/ls.1:/tmp/9ZnUSxR1/8-ls.1 \
     service-foo \
       cmd-bar \
