@@ -1,4 +1,4 @@
-# dcwr
+# DCWR - Docker Compose Wrap Run
 
 Run a command inside Docker Compose as if it were local
 
