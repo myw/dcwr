@@ -8,11 +8,11 @@ Run a command inside Docker Compose as if it were local
 Command-line usage:
 
 ```
-dwcr [-h|--help] [-f|--file compose-file] [-q|--quiet] [-n|--no-run] [-k|--keep] [*]
+dcwr [-h|--help] [-f|--file compose-file] [-q|--quiet] [-n|--no-run] [-k|--keep] [*]
 
   Transparently run a command inside a Docker Compose service
 
-  dwcr runs the command inside a new Docker container for the Docker Compose
+  dcwr runs the command inside a new Docker container for the Docker Compose
   service specified, as if it were running locally. It does this by taking
   every command argument that points to a file or directory, mounting it
   inside the Docker container and replacing it with the mount point
