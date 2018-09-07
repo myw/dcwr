@@ -18,7 +18,7 @@ dcwr [-h|--help] [-f|--file compose-file] [-q|--quiet] [-n|--no-run] [-k|--keep]
   inside the Docker container and replacing it with the mount point
   destination.
 
-  By default, print the final docker-compose command before running it.
+  By default, it prints the final docker-compose command before running it.
 
 Arguments:
   -h --help   - show this usage info
