@@ -54,6 +54,7 @@ Example:
 - Docker
 - Docker Compose
 - `bash` >= 2.0
+- Standard POSIX system utilities, specifically: `cat`, `env`, `mktemp`. 
 
 
 ## Caveats
