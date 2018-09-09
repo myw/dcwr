@@ -54,7 +54,7 @@ Example:
 - Docker
 - Docker Compose
 - `bash` >= 2.0
-- Standard POSIX system utilities, specifically: `cat`, `env`, `mktemp`. 
+- Standard POSIX system utilities, specifically: `cat`, `env`, `mktemp`.
 
 
 ## Caveats
@@ -62,10 +62,12 @@ Example:
 This is a convenience utility and its approach fundamentally *cannot* account for all edge cases so
 it has some important caveats:
 
+- Arguments that are not strictly filenames, like `-f/foobar/baz`, or `--loc=path/to/file`, are not
+  modified.
 - New files/directories (i.e. that do not already exist on the host system) cannot be mounted this
   way: you will have to `touch` or `mkdir` them first on your own
 - Commands that reference other files that are not specified in the container or otherwise
   mounted will not work without additional options
 - Docker images that do not tolerate mounts into a temp directory will not work
 - The executing command is always at the mercy of the image, so there are lots of other
-  potential ways to "break" the default behavior
+  potential ways to "break" the expected behavior
