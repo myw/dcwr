@@ -98,7 +98,8 @@ for ((ax=1;ax<=$#;ax++)); do
         mount_source=$arg
       ;;
       *)
-        mount_source=$PWD/$arg;;
+        mount_source=$PWD/$arg
+      ;;
     esac
 
     mount_destinations[$ax]="$container_mount_root/$ax-$(basename $arg)"
