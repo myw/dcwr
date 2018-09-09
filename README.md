@@ -49,12 +49,21 @@ Example:
         /tmp/9ZnUSxR1/8-ls.1
 ```
 
+
 ## Dependencies
 
 - Docker
 - Docker Compose
 - `bash` >= 2.0
 - Standard POSIX system utilities, specifically: `cat`, `env`, `mktemp`.
+
+
+## Installation
+
+Download or clone the repository and move, copy, or link `dcwr` into a directory on your `$PATH`, or
+add the directory it's in to your `$PATH` through your shell's login environment settings. The best
+practice on most systems is to copy `dcwr` into `$HOME/bin` if installing it for just a single
+user, or `/usr/local/bin` if installing it for everyone.
 
 
 ## Caveats
